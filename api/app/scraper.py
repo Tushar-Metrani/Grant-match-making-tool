@@ -35,6 +35,14 @@ def is_relevant_grant(title: str, description: str) -> bool:
     except Exception as e:
         print(f"Relevance check error: {e}")
         return True  # if unsure, keep it
+    
+def truncate_description(text: str, max_sentences: int = 4) -> str:
+    if not text:
+        return ""
+    # Split on sentence endings
+    import re
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    return " ".join(sentences[:max_sentences])
 
 
 GRANTS_GOV_URL = "https://apply07.grants.gov/grantsws/rest/opportunities/search/"
@@ -124,7 +132,7 @@ async def process_and_store(opportunities: list):
 
                 # fetching more details from fetchOpportunity endpoint
                 details = await fetch_opportunity_details(detail_client, opportunity_id)
-                description = details["description"] or title
+                description = truncate_description(details["description"]) or title
 
 
                 if not is_relevant_grant(title, description):

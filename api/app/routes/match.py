@@ -99,7 +99,7 @@ async def match_grants(req: MatchRequest):
     # Semantic search via pgvector — cast a wider net since AI will re-score
     response = supabase.rpc("match_grants", {
         "query_embedding": query_embedding,
-        "match_threshold": 0.6,
+        "match_threshold": 0.5,
         "match_count": 15
     }).execute()
 
