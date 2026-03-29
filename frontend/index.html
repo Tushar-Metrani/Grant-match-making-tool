@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GrantScope — Find Your Funding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-icon">🌿</div>
+      <span class="nav-logo-text">Grant<span>Scope</span></span>
+    </a>
+    <div class="nav-pill">AI-Powered Matching</div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">For Animal & Environmental Advocates</div>
+    <h1>Find funding that <em>fits</em> your mission</h1>
+    <p>Describe your organization and we'll surface the most aligned grant opportunities — ranked by fit, urgency, and
+      award size.</p>
+
+    <div class="search-card">
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label" for="mission">Mission Statement <span>*</span></label>
+          <textarea id="mission"
+            placeholder="e.g. We protect endangered marine wildlife through community-led conservation, policy advocacy, and habitat restoration across coastal ecosystems…"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="areas">Areas of Work <span>*</span></label>
+          <textarea id="areas"
+            placeholder="e.g. marine conservation, ocean plastic cleanup, policy advocacy, coastal habitat restoration, community education…"></textarea>
+        </div>
+      </div>
+      <div class="search-footer">
+        <p class="search-hint">We'll match against <strong>2,400+</strong> open opportunities from foundations,
+          government portals &amp; more</p>
+        <button class="btn-search" id="searchBtn" onclick="handleSearch()">
+          <span>Find Grants</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="results-section">
+    <div id="resultsContainer"></div>
+  </section>
+
+  <script>
+    // ── MOCK DATA ────────────────────────────────────────────────────────────────
+    const MOCK_GRANTS = [
+      {
+        id: 1,
+        funder: "Moore Foundation",
+        name: "Ocean Conservation Initiative Grant",
+        alignment: 94,
+        deadline: "2025-04-18",
+        daysLeft: 21,
+        awardMin: 150000,
+        awardMax: 500000,
+        link: "#",
+        summary: "Your coastal habitat restoration work aligns strongly with Moore's Ocean Conservation Initiative, which funds science-based organizations working on marine biodiversity, plastic pollution reduction, and community stewardship in Pacific and Atlantic coastal zones. Your policy advocacy component is particularly relevant given their current priority to strengthen national ocean protection legislation."
+      },
+      {
+        id: 2,
+        funder: "US Dept. of Commerce — NOAA",
+        name: "Bycatch Reduction Grant Program",
+        alignment: 88,
+        deadline: "2025-05-02",
+        daysLeft: 35,
+        awardMin: 50000,
+        awardMax: 200000,
+        link: "#",
+        summary: "NOAA's Bycatch Reduction Program is a strong match for your marine wildlife focus, specifically funding organizations that work to minimize unintentional catch of endangered species. Your documented community-led monitoring programs and existing relationships with fishing communities are key eligibility strengths that position your application competitively."
+      },
+      {
+        id: 3,
+        funder: "Patagonia Environmental Grants",
+        name: "Grassroots Environmental Activism Fund",
+        alignment: 81,
+        deadline: "2025-06-15",
+        daysLeft: 79,
+        awardMin: 10000,
+        awardMax: 35000,
+        link: "#",
+        summary: "Patagonia's grassroots fund prioritizes frontline environmental organizations with demonstrated community engagement over institutional reach. Your coastal education programs and volunteer-driven restoration model align well, though your award size request should stay below $30K to fit their typical grant range. This is an excellent match for a smaller, targeted project proposal."
+      },
+      {
+        id: 4,
+        funder: "11th Hour Project",
+        name: "Marine & Freshwater Ecosystems Grant",
+        alignment: 76,
+        deadline: "2025-04-08",
+        daysLeft: 11,
+        awardMin: 75000,
+        awardMax: 300000,
+        link: "#",
+        summary: "The 11th Hour Project funds systems-change work in food and ocean systems — your habitat restoration and policy advocacy fit their theory of change well. However, the very tight deadline of 11 days requires an expedited application process. Their LOI is short-form and they respond within 3 weeks, making this a high-effort but potentially high-reward opportunity worth pursuing if you have recent impact data ready."
+      },
+      {
+        id: 5,
+        funder: "National Fish & Wildlife Foundation",
+        name: "Five Star & Urban Waters Restoration",
+        alignment: 71,
+        deadline: "2025-07-30",
+        daysLeft: 124,
+        awardMin: 25000,
+        awardMax: 100000,
+        link: "#",
+        summary: "NFWF's Five Star program is a federal-private partnership focused on locally-led habitat restoration in watersheds and coastal areas. Your community engagement methodology and measurable restoration outcomes match their reporting requirements. This grant has a generous timeline and strong federal backing, making it suitable for a well-documented proposal with before/after habitat data."
+      },
+      {
+        id: 6,
+        funder: "Wilburforce Foundation",
+        name: "Conservation Science & Advocacy",
+        alignment: 67,
+        deadline: "2025-05-20",
+        daysLeft: 53,
+        awardMin: 80000,
+        awardMax: 250000,
+        link: "#",
+        summary: "Wilburforce funds science-driven conservation efforts in the American West and Pacific Coast, with a growing portfolio in marine and coastal ecosystems. Your advocacy work aligns moderately — they favor organizations that integrate ecological research with policy change. Strengthening the scientific basis of your application would significantly improve fit and competitiveness for this opportunity."
+      }
+    ];
+
+    // ── HELPERS ──────────────────────────────────────────────────────────────────
+
+    function formatAward(min, max) {
+      if (!min && !max) return 'Not specified';
+      const fmt = n => n >= 1000000
+        ? '$' + (n / 1000000).toFixed(1) + 'M'
+        : '$' + (n / 1000).toFixed(0) + 'K';
+      if (!min) return 'Up to ' + fmt(max);
+      if (!max) return 'From ' + fmt(min);
+      return fmt(min) + ' – ' + fmt(max);
+    }
+
+    function urgencyClass(days) {
+      if (days <= 20) return 'urgency-high';
+      if (days <= 60) return 'urgency-mid';
+      return 'urgency-low';
+    }
+
+    function urgencyLabel(days) {
+      if (days <= 20) return { label: `${days}d left`, badge: 'Urgent' };
+      if (days <= 60) return { label: `${days}d left`, badge: 'Soon' };
+      return { label: `${days}d left`, badge: 'Open' };
+    }
+
+    function formatDeadline(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // ── RENDER CARD ───────────────────────────────────────────────────────────────
+    function renderCard(grant, idx) {
+      const urg = urgencyClass(grant.days_left);
+      const urgInfo = urgencyLabel(grant.days_left);
+
+      return `
+    <div class="grant-card" style="animation-delay:${idx * 70}ms">
+      <div class="grant-card-top">
+        <div>
+          <div class="grant-funder">${grant.funder}</div>
+          <div class="grant-name">${grant.title}</div>
+        </div>
+        <div class="grant-rank">#${idx + 1}</div>
+      </div>
+
+      <p class="grant-summary">${grant.summary}</p>
+
+      <div class="metrics-row">
+        <div class="metric-box alignment">
+          <div class="metric-label">Alignment</div>
+          <div class="metric-value">${grant.alignment}%</div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill" style="width:${grant.alignment}%"></div>
+          </div>
+        </div>
+
+        <div class="metric-box ${urg}">
+          <div class="metric-label">Deadline</div>
+          <div class="urgency-badge">
+            <span class="urgency-dot"></span>
+            ${urgInfo.badge}
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${urgInfo.label}</div>
+        </div>
+
+        <div class="metric-box award">
+          <div class="metric-label">Award Size</div>
+          <div class="award-amount">${formatAward(grant.award_min, grant.award_max)}</div>
+          <div class="award-sub">${grant.award_min || grant.award_max ? 'grant range' : 'check listing'}</div>
+          </div>
+        </div>
+
+      <div class="card-footer">
+        <div class="deadline-text">
+          📅 Deadline: ${formatDeadline(grant.deadline)}
+        </div>
+        <a class="btn-apply" href="${grant.application_url}" target="_blank" rel="noopener">
+          Apply Now ↗
+        </a>
+      </div>
+    </div>
+  `;
+    }
+
+    // ── LOADING SKELETON ─────────────────────────────────────────────────────────
+    function renderLoading() {
+      const skels = Array.from({ length: 6 }, () => `
+    <div class="skeleton-card">
+      <div class="skel skel-title"></div>
+      <div class="skel skel-line w80"></div>
+      <div class="skel skel-line w60"></div>
+      <div class="skel skel-line w80"></div>
+      <div class="skel-bars">
+        <div class="skel-bar"></div>
+        <div class="skel-bar"></div>
+        <div class="skel-bar"></div>
+      </div>
+      <div class="skel skel-btn"></div>
+    </div>
+  `).join('');
+      return `<div class="loading-grid">${skels}</div>`;
+    }
+
+    // ── MAIN HANDLER ─────────────────────────────────────────────────────────────
+    async function handleSearch() {
+      const mission = document.getElementById('mission').value.trim();
+      const areas = document.getElementById('areas').value.trim();
+      const btn = document.getElementById('searchBtn');
+      const container = document.getElementById('resultsContainer');
+
+      if (!mission || !areas) {
+        if (!mission) document.getElementById('mission').focus();
+        else document.getElementById('areas').focus();
+        return;
+      }
+
+      // Show loading
+      btn.disabled = true;
+      btn.innerHTML = '<span>Searching…</span><span class="btn-icon" style="animation:spin 1s linear infinite">⟳</span>';
+      container.innerHTML = `
+    <div class="results-header">
+      <div class="results-title">Finding matches…</div>
+    </div>
+    ${renderLoading()}
+  `;
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+
+
+      try {
+        const res = await fetch('http://localhost:8000/api/match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mission, areas })
+        });
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        grants = data.grants;
+      } catch (err) {
+        container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">⚠️</span>
+        <h3>Something went wrong</h3>
+        <p>Could not connect to the API. Make sure the server is running.</p>
+      </div>
+      `;
+
+        btn.disabled = false;
+        btn.innerHTML = '<span>Find Grants</span><span class="btn-icon">→</span>';
+        return;
+      }
+
+
+      // Render results
+      const cards = grants.map((g, i) => renderCard(g, i)).join('');
+      container.innerHTML = `
+    <div class="results-header">
+      <div class="results-title"><span>${grants.length}</span> opportunities found</div>
+      <div class="results-meta">Sorted by alignment score</div>
+    </div>
+    <div class="cards-grid">${cards}</div>
+  `;
+
+      btn.disabled = false;
+      btn.innerHTML = '<span>Search Again</span><span class="btn-icon">→</span>';
+    }
+
+    // Allow Enter key on inputs
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handleSearch();
+    });
+  </script>
+
+  <style>
+    @keyframes spin {
+      from {
+        display: inline-block;
+        transform: rotate(0deg);
+      }
+
+      to {
+        display: inline-block;
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+</body>
+
+</html>

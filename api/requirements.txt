@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+supabase
+google-genai
+httpx
+apscheduler
+python-dotenv
