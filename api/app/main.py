@@ -5,21 +5,25 @@ from app.scheduler import start_scheduler
 from app.scraper import fetch_grants_gov
 from app.routes.match import router
 from app.database import supabase
+from app.config import APP_URL
+import asyncio
+
+async def run_scrape_if_empty():
+    await asyncio.sleep(5)  # wait for app to fully start
+    try:
+        existing = supabase.table("grants").select("id").limit(1).execute()
+        if not existing.data:
+            print("DB is empty — running initial scrape...")
+            await fetch_grants_gov()
+        else:
+            print("DB already has data — skipping initial scrape")
+    except Exception as e:
+        print(f"Scrape error: {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Checking if initial scrape is needed...")
-    
-    # Only scrape if grants table is empty
-    existing = supabase.table("grants").select("id").limit(1).execute()
-    
-    if not existing.data:
-        print("DB is empty — running initial scrape...")
-        await fetch_grants_gov()
-    else:
-        print(f"DB already has data — skipping initial scrape")
-    
-    start_scheduler()
+    asyncio.create_task(run_scrape_if_empty())
+    start_scheduler(app_url=APP_URL)
     yield
     print("Shutting down...")
 
@@ -31,7 +35,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten this to your frontend URL in production
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"]
 )
