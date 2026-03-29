@@ -19,9 +19,9 @@ router = APIRouter()
 
 # Two clients, same key — round robin across two model IDs to get 10 RPM
 MODELS = [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-3-flash-preview"
+    "gemma-3-12b-it",
+    "gemma-3-27b-it",
+    "gemini-3.1-flash-lite-preview",
 ]
 
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -45,7 +45,7 @@ Grant description: {grant_description}
 Respond ONLY with a JSON object, no markdown, no backticks, no explanation. Format:
 {{
   "alignment_score": <integer 0-100 representing how well this grant fits the organization>,
-  "summary": "<3-4 sentence paragraph explaining why this grant is or isn't a good fit. Be specific and practical. Do not start with This grant.>"
+  "summary": "exactly 60 words explaining why this grant is or isn't a good fit. Be specific and practical. Do not start with This grant.>"
 }}
 
 When scoring alignment consider:
@@ -99,7 +99,7 @@ async def match_grants(req: MatchRequest):
     # Semantic search via pgvector — cast a wider net since AI will re-score
     response = supabase.rpc("match_grants", {
         "query_embedding": query_embedding,
-        "match_threshold": 0.4,
+        "match_threshold": 0.6,
         "match_count": 15
     }).execute()
 

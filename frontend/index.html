@@ -153,12 +153,14 @@
     }
 
     function urgencyClass(days) {
+      if (days === null) return 'urgency-low';
       if (days <= 20) return 'urgency-high';
       if (days <= 60) return 'urgency-mid';
       return 'urgency-low';
     }
 
     function urgencyLabel(days) {
+      if (days === null) return { label: 'No deadline', badge: 'Open' };
       if (days <= 20) return { label: `${days}d left`, badge: 'Urgent' };
       if (days <= 60) return { label: `${days}d left`, badge: 'Soon' };
       return { label: `${days}d left`, badge: 'Open' };
@@ -201,7 +203,7 @@
             <span class="urgency-dot"></span>
             ${urgInfo.badge}
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${urgInfo.label}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${grant.days_left !== null ? urgInfo.label : 'No deadline'}</div>
         </div>
 
         <div class="metric-box award">
@@ -213,7 +215,7 @@
 
       <div class="card-footer">
         <div class="deadline-text">
-          📅 Deadline: ${formatDeadline(grant.deadline)}
+          📅 Deadline: ${grant.deadline !==null ?formatDeadline(grant.deadline):'No deadline'}
         </div>
         <a class="btn-apply" href="${grant.application_url}" target="_blank" rel="noopener">
           Apply Now ↗
