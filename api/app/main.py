@@ -23,7 +23,7 @@ async def run_scrape_if_empty():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     asyncio.create_task(run_scrape_if_empty())
-    start_scheduler(app_url=APP_URL)
+    start_scheduler()
     yield
     print("Shutting down...")
 
