@@ -6,7 +6,7 @@ async function waitForServer() {
   const loadingScreen = document.getElementById('loadingScreen');
   
   let attempts = 0;
-  const maxAttempts = 20; // wait up to ~60 seconds
+  const maxAttempts = 5;
 
   while (attempts < maxAttempts) {
     try {
@@ -29,7 +29,7 @@ async function waitForServer() {
     }
 
     attempts++;
-    await new Promise(r => setTimeout(r, 3000)); // wait 3s between attempts
+    await new Promise(r => setTimeout(r, 20000));
   }
 
   // If server never responded
