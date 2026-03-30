@@ -5,7 +5,6 @@ from app.scheduler import start_scheduler
 from app.scraper import fetch_grants_gov
 from app.routes.match import router
 from app.database import supabase
-from app.config import APP_URL
 import asyncio
 
 async def run_scrape_if_empty():
