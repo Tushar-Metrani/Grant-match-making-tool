@@ -3,7 +3,7 @@
 An AI-powered tool that matches animal advocacy and environmental organizations with relevant grant opportunities.
 
 ## Live Demo
-- **Frontend:** https://tushar-metrani.github.io/Grant-match-making-tool
+- **Website:** https://tushar-metrani.github.io/Grant-match-making-tool
 - **API:** https://grant-match-making-tool-production.up.railway.app/docs
 
 ## Architecture
