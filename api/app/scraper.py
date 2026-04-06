@@ -10,9 +10,9 @@ import time
 genai_client = genai.Client(api_key=GEMINI_API_KEY)
 
 def is_relevant_grant(title: str, description: str) -> bool:
-    time.sleep(0.4)
+    time.sleep(0.5)
     try:
-        prompt = f"""You are a filter for an animal welfare and environmental sustainability grant database.
+        prompt = f"""You are a strict relevance filter for a vegan-aligned animal welfare and environmental sustainability grant database.
 
         Grant title: {title}
         Grant description: {description}
@@ -24,7 +24,12 @@ def is_relevant_grant(title: str, description: str) -> bool:
         - Renewable energy or clean energy
         - Environmental justice or green infrastructure
 
-        Respond with ONLY "yes" or "no". Nothing else."""
+        Exclude grants that:
+        Support or improve animal agriculture without reducing harm (e.g., “sustainable livestock,” “humane meat,” welfare reforms that maintain exploitation)
+
+        Respond with ONLY "yes" or "no". Nothing else.
+        
+        """
 
         response = genai_client.models.generate_content(
             model="gemma-3-27b-it",
