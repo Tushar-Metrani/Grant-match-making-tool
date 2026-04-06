@@ -17,9 +17,11 @@ class MatchRequest(BaseModel):
 
 router = APIRouter()
 
-# Two clients, same key — round robin across two model IDs to get 10 RPM
+# round robin across models IDs to get avoid hitting RPM
 MODELS = [
+    "gemini-2.5-flash-lite",
     "gemma-3-12b-it",
+    "gemini-2.5-flash-lite",
     "gemma-3-27b-it",
     "gemini-3.1-flash-lite-preview",
 ]
@@ -100,7 +102,7 @@ async def match_grants(req: MatchRequest):
     response = supabase.rpc("match_grants", {
         "query_embedding": query_embedding,
         "match_threshold": 0.5,
-        "match_count": 15
+        "match_count": 5
     }).execute()
 
     results = []
