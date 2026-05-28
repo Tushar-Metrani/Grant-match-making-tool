@@ -1,5 +1,5 @@
 
-const API_URL = 'https://grant-match-making-tool-production.up.railway.app';
+const API_URL = 'https://grant-match-making-tool-production-1a15.up.railway.app';
 
 async function waitForServer() {
   const loadingMsg = document.getElementById('loadingMsg');
