@@ -1,3 +1,4 @@
+# Open Paws Work Test
 # GrantScope — Grant Opportunity Matcher
 
 An AI-powered tool that matches animal advocacy and environmental organizations with relevant grant opportunities.
